@@ -140,8 +140,9 @@
         <fullName>PhoneCal_SearchPlaceholder</fullName>
         <language>ja</language>
         <protected>false</protected>
-        <shortDescription>User search input placeholder</shortDescription>
-        <value>ユーザーを検索...</value>
+        <shortDescription
+    >User and calendar search input placeholder</shortDescription>
+        <value>ユーザーとカレンダーを検索...</value>
     </labels>
     <labels>
         <fullName>PhoneCal_SectionPublicResource</fullName>
