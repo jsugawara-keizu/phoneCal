@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Translations xmlns="http://soap.sforce.com/2006/04/metadata">
     <customLabels>
         <name>PhoneCal_AgendaSuffix</name>
@@ -27,10 +27,6 @@
     <customLabels>
         <name>PhoneCal_Error</name>
         <label>Error</label>
-    </customLabels>
-    <customLabels>
-        <name>PhoneCal_EventDetail</name>
-        <label>Event Details</label>
     </customLabels>
     <customLabels>
         <name>PhoneCal_ErrorLoad</name>
@@ -75,10 +71,6 @@
     <customLabels>
         <name>PhoneCal_OpenDayView</name>
         <label>Open Day View</label>
-    </customLabels>
-    <customLabels>
-        <name>PhoneCal_OpenRecord</name>
-        <label>Open Record</label>
     </customLabels>
     <customLabels>
         <name>PhoneCal_PrevPeriod</name>

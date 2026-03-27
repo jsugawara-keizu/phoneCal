@@ -11,40 +11,12 @@
  *  - イベント表示（通常・終日・日跨ぎ）
  *  - Apex 呼び出しパラメータ
  *  - エラーハンドリング
- *  - イベント詳細パネル（コンパクトレイアウト）
  */
 import { createElement } from "lwc";
 import PhoneCalendar from "c/phoneCalendar";
-import {
-  registerApexTestWireAdapter,
-  registerLdsTestWireAdapter
-} from "@salesforce/wire-service-jest-util";
+import { registerApexTestWireAdapter } from "@salesforce/wire-service-jest-util";
 import getActiveUsers from "@salesforce/apex/PhoneCalendarController.getActiveUsers";
 import getPublicCalendars from "@salesforce/apex/PhoneCalendarController.getPublicCalendars";
-import { getLayout, getRecord } from "lightning/uiRecordApi";
-
-// lightning/uiRecordApi のスタブは frozen オブジェクトのため registerLdsTestWireAdapter
-// が "Invalid adapterId, it must be extensible" を投げる。
-// jest.mock で extensible な jest.fn() に差し替えることで解決する。
-jest.mock("lightning/uiRecordApi", () => ({
-  getLayout: jest.fn(),
-  getRecord: jest.fn(),
-  // getFieldDisplayValue / getFieldValue はレコードの fields から値を取り出す実装を持たせる
-  getFieldDisplayValue: jest.fn((record, fieldPath) => {
-    if (!record?.fields) {
-      return undefined;
-    }
-    const name = String(fieldPath).split(".").pop();
-    return record.fields[name]?.displayValue ?? undefined;
-  }),
-  getFieldValue: jest.fn((record, fieldPath) => {
-    if (!record?.fields) {
-      return undefined;
-    }
-    const name = String(fieldPath).split(".").pop();
-    return record.fields[name]?.value ?? undefined;
-  })
-}));
 import getCalendarPreference from "@salesforce/apex/PhoneCalendarController.getCalendarPreference";
 import getEventsForMonth from "@salesforce/apex/PhoneCalendarController.getEventsForMonth";
 import saveCalendarPreference from "@salesforce/apex/PhoneCalendarController.saveCalendarPreference";
@@ -74,63 +46,6 @@ jest.mock(
 const getActiveUsersAdapter = registerApexTestWireAdapter(getActiveUsers);
 // getPublicCalendars は現在のテストでは emit しないため adapter 変数は不要
 registerApexTestWireAdapter(getPublicCalendars);
-
-// LDS ワイヤーアダプター（getLayout / getRecord）
-const getLayoutAdapter = registerLdsTestWireAdapter(getLayout);
-const getRecordAdapter = registerLdsTestWireAdapter(getRecord);
-
-// ── コンパクトレイアウト モックデータ ────────────────────────────────────────────
-const MOCK_LAYOUT = {
-  sections: [
-    {
-      layoutRows: [
-        {
-          layoutItems: [
-            {
-              label: "件名",
-              layoutComponents: [{ componentType: "Field", apiName: "Subject" }]
-            }
-          ]
-        },
-        {
-          layoutItems: [
-            {
-              label: "開始",
-              layoutComponents: [
-                { componentType: "Field", apiName: "ActivityDateTime" }
-              ]
-            }
-          ]
-        },
-        {
-          layoutItems: [
-            {
-              label: "場所",
-              layoutComponents: [
-                { componentType: "Field", apiName: "Location" }
-              ]
-            }
-          ]
-        }
-      ]
-    }
-  ]
-};
-
-const MOCK_RECORD = {
-  apiName: "Event",
-  fields: {
-    Subject: {
-      value: "チームミーティング",
-      displayValue: "チームミーティング"
-    },
-    ActivityDateTime: {
-      value: "2025-06-10T09:00:00.000Z",
-      displayValue: "2025/06/10 9:00"
-    },
-    Location: { value: null, displayValue: null }
-  }
-};
 
 // ── ユーティリティ ─────────────────────────────────────────────────────────────
 /** マイクロタスクキューを複数段階空にする（setTimeout を使わない） */
@@ -605,95 +520,6 @@ describe("c-phone-calendar", () => {
       await flushPromises();
 
       expect(saveCalendarPreference).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  // ── 10. イベント詳細パネル（コンパクトレイアウト）────────────────────────────
-
-  describe("イベント詳細パネル", () => {
-    async function openEventDetail(el, eventId) {
-      // 日表示に切り替えてイベントをクリック
-      await openViewMenu(el);
-      await switchView(el, "day");
-      const evEl = el.shadowRoot.querySelector(`[data-id="${eventId}"]`);
-      if (!evEl) {
-        return false;
-      }
-      evEl.click();
-      await flushPromises();
-      return true;
-    }
-
-    it("イベントクリックで詳細パネルが開く", async () => {
-      const el = await createAndFlush({ events: [TIMED_EVENT] });
-      const opened = await openEventDetail(el, TIMED_EVENT.Id);
-      if (!opened) {
-        return;
-      }
-      expect(el.shadowRoot.querySelector(".bottom-sheet")).not.toBeNull();
-    });
-
-    it("パネル表示中にコンパクトレイアウトデータが emit されるとフィールドが表示される", async () => {
-      const el = await createAndFlush({ events: [TIMED_EVENT] });
-      const opened = await openEventDetail(el, TIMED_EVENT.Id);
-      if (!opened) {
-        return;
-      }
-
-      // getLayout でレイアウト定義を emit
-      getLayoutAdapter.emit(MOCK_LAYOUT);
-      // getRecord でレコードデータを emit
-      getRecordAdapter.emit(MOCK_RECORD);
-      await flushPromises();
-
-      const rows = el.shadowRoot.querySelectorAll(".event-detail-row");
-      // Location は null なのでフィルターされ Subject + ActivityDateTime の 2行
-      expect(rows.length).toBe(2);
-    });
-
-    it("フィールド行にラベルと値が表示される", async () => {
-      const el = await createAndFlush({ events: [TIMED_EVENT] });
-      const opened = await openEventDetail(el, TIMED_EVENT.Id);
-      if (!opened) {
-        return;
-      }
-
-      getLayoutAdapter.emit(MOCK_LAYOUT);
-      getRecordAdapter.emit(MOCK_RECORD);
-      await flushPromises();
-
-      const rows = [...el.shadowRoot.querySelectorAll(".event-detail-row")];
-      const labels = rows.map(
-        (r) => r.querySelector("p:first-child").textContent
-      );
-      const values = rows.map(
-        (r) => r.querySelector("p:last-child").textContent
-      );
-
-      expect(labels).toContain("件名");
-      expect(values).toContain("チームミーティング");
-    });
-
-    it("オーバーレイクリックでパネルが閉じる", async () => {
-      const el = await createAndFlush({ events: [TIMED_EVENT] });
-      const opened = await openEventDetail(el, TIMED_EVENT.Id);
-      if (!opened) {
-        return;
-      }
-
-      el.shadowRoot.querySelector(".bottom-sheet-overlay").click();
-      await Promise.resolve();
-      expect(el.shadowRoot.querySelector(".bottom-sheet")).toBeNull();
-    });
-
-    it("レイアウト未ロード時はスピナーが表示される", async () => {
-      const el = await createAndFlush({ events: [TIMED_EVENT] });
-      const opened = await openEventDetail(el, TIMED_EVENT.Id);
-      if (!opened) {
-        return;
-      }
-      // emit なし → hasEventDetailRows = false → spinner
-      expect(el.shadowRoot.querySelector("lightning-spinner")).not.toBeNull();
     });
   });
 });
