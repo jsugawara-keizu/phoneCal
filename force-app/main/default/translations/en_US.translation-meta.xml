@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <Translations xmlns="http://soap.sforce.com/2006/04/metadata">
     <customLabels>
         <name>PhoneCal_AgendaSuffix</name>
@@ -135,5 +135,25 @@
     <customLabels>
         <name>PhoneCal_ViewMonth</name>
         <label>Month</label>
+    </customLabels>
+    <customLabels>
+        <name>PhoneCal_NoPermission</name>
+        <label>You don't have permission to use this component.</label>
+    </customLabels>
+    <customLabels>
+        <name>PhoneCal_WorkEndHour</name>
+        <label>Work End Hour</label>
+    </customLabels>
+    <customLabels>
+        <name>PhoneCal_WorkEndHourDesc</name>
+        <label>End hour for off-hours background shading (0–23)</label>
+    </customLabels>
+    <customLabels>
+        <name>PhoneCal_WorkStartHour</name>
+        <label>Work Start Hour</label>
+    </customLabels>
+    <customLabels>
+        <name>PhoneCal_WorkStartHourDesc</name>
+        <label>Start hour for off-hours background shading (0–23)</label>
     </customLabels>
 </Translations>
