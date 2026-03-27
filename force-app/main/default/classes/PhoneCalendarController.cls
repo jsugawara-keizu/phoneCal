@@ -124,7 +124,7 @@ public without sharing class PhoneCalendarController {
     return [
       SELECT Id, Name, Type
       FROM Calendar
-      WHERE IsActive = TRUE AND Type IN ('P', 'R')
+      WHERE IsActive = TRUE AND Type IN ('Public', 'Resource')
       ORDER BY Type ASC, Name ASC
       LIMIT 50
     ];
