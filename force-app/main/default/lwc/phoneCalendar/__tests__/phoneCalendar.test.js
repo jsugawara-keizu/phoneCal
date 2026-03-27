@@ -134,6 +134,9 @@ function getHeaderBtns(el) {
 // ── テスト本体 ─────────────────────────────────────────────────────────────────
 describe("c-phone-calendar", () => {
   beforeEach(() => {
+    // テスト間で localStorage を共有しないようにクリア
+    // （ビューモード切り替えテストが localStorage に書き込むため）
+    localStorage.clear();
     // saveCalendarPreference を Promise を返すようにデフォルト設定
     // （コンポーネントが .catch() を呼ぶため undefined では TypeError になる）
     saveCalendarPreference.mockResolvedValue(undefined);

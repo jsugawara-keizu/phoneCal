@@ -69,7 +69,8 @@ const AGENDA_NAV_DAYS = 14,
   SWIPE_THRESHOLD = 50,
   THREE_DAY_OFFSET = 2,
   THREE_DAY_STEP = 3,
-  TIME_GRID_TOTAL_PX = 1440;
+  TIME_GRID_TOTAL_PX = 1440,
+  VIEW_MODE_KEY = "phoneCalViewMode";
 
 const USER_COLORS = [
   { bg: "#d8edff", border: "#0176d3" },
@@ -677,6 +678,10 @@ export default class PhoneCalendar extends NavigationMixin(LightningElement) {
 
   connectedCallback() {
     this.anchorDateStr = this.toDateStr(new Date());
+    const savedMode = localStorage.getItem(VIEW_MODE_KEY);
+    if (savedMode) {
+      this.viewMode = savedMode;
+    }
     this.touchMoveHandler = (evt) => {
       if (evt.touches.length !== 1) {
         return;
@@ -1000,6 +1005,7 @@ export default class PhoneCalendar extends NavigationMixin(LightningElement) {
       return;
     }
     this.viewMode = mode;
+    localStorage.setItem(VIEW_MODE_KEY, mode);
     if (mode === "day" || mode === "3day") {
       this.shouldScrollToCurrentHour = true;
     }
@@ -1093,6 +1099,7 @@ export default class PhoneCalendar extends NavigationMixin(LightningElement) {
   handleViewDayForSelectedDate() {
     this.anchorDateStr = this.selectedDate;
     this.viewMode = "day";
+    localStorage.setItem(VIEW_MODE_KEY, "day");
     this.showDayPanel = false;
     this.dayPanelExpanded = false;
     this.shouldScrollToCurrentHour = true;
