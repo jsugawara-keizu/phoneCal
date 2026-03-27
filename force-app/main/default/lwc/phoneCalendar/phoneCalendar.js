@@ -1004,7 +1004,7 @@ export default class PhoneCalendar extends NavigationMixin(LightningElement) {
 
   handleOpenUserPanel() {
     this.userSearchTerm = "";
-    this.userPanelExpanded = false;
+    this.userPanelExpanded = true;
     this.showUserPanel = true;
   }
 
