@@ -59,7 +59,7 @@ public without sharing class PhoneCalendarController {
    * @param ownerIds   User IDs to filter by; defaults to running user when empty
    * @return List of Event records ordered by start time
    */
-  @AuraEnabled(cacheable=true)
+  @AuraEnabled
   public static List<Event> getEventsForMonth(
     String startDate,
     String endDate,
